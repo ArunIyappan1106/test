@@ -1,0 +1,43 @@
+name: Check Helm Template Files
+
+on:
+   workflow_dispatch:
+
+jobs:
+  validate-helm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Helm template files
+        shell: bash
+        run: |
+          HELM_DIR="Container/helm"
+          TEMPLATE_DIR="$HELM_DIR/template"
+
+          # Check if Container/helm exists
+          if [ -d "$HELM_DIR" ]; then
+            echo "Container/helm exists."
+
+            # Check if template folder exists
+            if [ -d "$TEMPLATE_DIR" ]; then
+              echo "template folder exists."
+
+              # Check for .tmpl files
+              if find "$TEMPLATE_DIR" -type f -name "*.tmpl" | grep -q .; then
+                echo "ERROR: .tmpl file(s) found in $TEMPLATE_DIR"
+                find "$TEMPLATE_DIR" -type f -name "*.tmpl"
+                exit 1
+              else
+                echo "No .tmpl files found. Proceeding..."
+              fi
+
+            else
+              echo "template folder does not exist. Proceeding..."
+            fi
+
+          else
+            echo "Container/helm does not exist. Proceeding..."
+          fi
